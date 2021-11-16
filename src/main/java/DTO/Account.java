@@ -15,16 +15,18 @@ public class Account {
         return username;
     }
 
-    public void setUsername(String username) {
+    public Account setUsername(String username) {
         this.username = username;
+        return this;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public Account setPassword(String password) {
         this.password = password;
+        return this;
     }
 
     public List<Mail> getMailList() {
@@ -39,4 +41,5 @@ public class Account {
     private String username;
     private String password;
     private List<Mail> mailList;
+
 }

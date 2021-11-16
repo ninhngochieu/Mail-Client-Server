@@ -1,3 +1,6 @@
+import DTO.Account;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
@@ -8,25 +11,22 @@ public class Client {
     private static BufferedReader bufferedReader;
     private static BufferedWriter bufferedWriter;
     private static Socket mainSocket;
-    private static Socket mailListenerSocket;
-    private static BufferedReader mailBufferedReader;
-    private static BufferedWriter mailBufferedWriter;
+    private static Account account = new Account();
+
 
     public static void main(String[] args) throws IOException {
         mainSocket = new Socket(HOST,PORT);
         bufferedReader = new BufferedReader(new InputStreamReader(mainSocket.getInputStream()));
         bufferedWriter = new BufferedWriter(new OutputStreamWriter(mainSocket.getOutputStream()));
-//
-//        mailListenerSocket =  new Socket(HOST, PORT);
-//        mailBufferedReader = new BufferedReader(new InputStreamReader(mailListenerSocket.getInputStream()));
-//        mailBufferedWriter = new BufferedWriter(new OutputStreamWriter(mailListenerSocket.getOutputStream()));
 
         Scanner scanner = new Scanner(System.in);
         Thread mainThead = new Thread(() -> {
             while (true){
-                String data = scanner.nextLine();
-                sendDataToServer(data, bufferedWriter);
-                receiveDataFromServer(bufferedReader);
+                String username = scanner.nextLine();
+                String password = scanner.nextLine();
+                account.setUsername(username).setPassword(password);
+                sendDataToServer(new JSONObject(account).toString());
+                receiveDataFromServer();
             }
         });
         Thread mailListener = new Thread(() -> {
@@ -36,9 +36,8 @@ public class Client {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                String data = "Listening Data";
-                sendDataToServer(data, bufferedWriter);
-                receiveDataFromServer(bufferedReader);
+                sendDataToServer(new JSONObject(account).put("checkmail","ádasd").toString());
+                receiveDataFromServer();
             }
         });
 
@@ -47,9 +46,9 @@ public class Client {
 
     }
 
-    private static void receiveDataFromServer(BufferedReader Reader) {
+    private static void receiveDataFromServer() {
         try {
-            String data = Reader.readLine();
+            String data = bufferedReader.readLine();
             System.out.println("Client receive: "+ data);
         } catch (IOException e) {
             e.printStackTrace();
@@ -57,11 +56,11 @@ public class Client {
         }
     }
 
-    private static void sendDataToServer(String data, BufferedWriter Writer) {
+    private static void sendDataToServer(String data) {
         try {
-            Writer.write(data);
-            Writer.newLine();
-            Writer.flush();
+            bufferedWriter.write(data);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
             closeConnection();
@@ -73,10 +72,6 @@ public class Client {
             bufferedWriter.close();
             bufferedReader.close();
             mainSocket.close();
-
-            mailBufferedReader.close();
-            mailBufferedWriter.close();
-            mailListenerSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

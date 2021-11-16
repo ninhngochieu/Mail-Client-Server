@@ -3,8 +3,9 @@ package DTO;
 import java.util.List;
 
 public class Mail {
-    private static final int READ = 0;
-    private static final int UNREAD = 1;
+    private static final int UNREAD = 0;
+    private static final int READ = 1;
+
 
     private int id;
     private String message;
